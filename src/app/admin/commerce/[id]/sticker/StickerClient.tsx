@@ -10,8 +10,23 @@ type Props = {
 
 export default function StickerClient({ commerce, wifiPageUrl }: Props) {
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Controls - hidden on print */}
+    <>
+      <style>{`
+        @media print {
+          .no-print { display: none !important; }
+          body { background: white !important; margin: 0 !important; }
+          @page { size: 10cm 10cm; margin: 0; }
+          #sticker-print-wrap {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+        }
+      `}</style>
+
+      {/* Everything below is hidden on print via .no-print */}
       <div className="no-print bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link href={`/admin/commerce/${commerce.id}`} className="text-gray-400 hover:text-gray-600 text-sm">
@@ -21,7 +36,7 @@ export default function StickerClient({ commerce, wifiPageUrl }: Props) {
         </div>
         <div className="flex items-center gap-3">
           <p className="text-xs text-gray-400 hidden md:block">
-            Taille : 10cm × 10cm · Compatible imprimante d'étiquettes et laser
+            10cm × 10cm · laser ou étiquettes
           </p>
           <button
             onClick={() => window.print()}
@@ -32,7 +47,6 @@ export default function StickerClient({ commerce, wifiPageUrl }: Props) {
         </div>
       </div>
 
-      {/* Info bar - hidden on print */}
       <div className="no-print max-w-2xl mx-auto px-6 py-4">
         <div className="bg-blue-50 rounded-xl p-4 text-sm text-blue-800 flex gap-3">
           <span className="text-xl">💡</span>
@@ -41,11 +55,11 @@ export default function StickerClient({ commerce, wifiPageUrl }: Props) {
             <ol className="list-decimal list-inside space-y-1 text-blue-700">
               <li>Cliquez sur "Imprimer le sticker"</li>
               <li>Sélectionnez votre imprimante (laser ou étiquettes)</li>
-              <li>Imprimez en taille réelle (100%, sans mise à l'échelle)</li>
+              <li>Imprimez en taille réelle (100 %, sans mise à l'échelle)</li>
               <li>Collez le sticker à un endroit visible dans le commerce</li>
             </ol>
             <p className="mt-2 text-xs text-blue-600">
-              URL de la page client :{' '}
+              URL client :{' '}
               <a href={wifiPageUrl} target="_blank" rel="noopener noreferrer" className="underline">
                 {wifiPageUrl}
               </a>
@@ -54,24 +68,21 @@ export default function StickerClient({ commerce, wifiPageUrl }: Props) {
         </div>
       </div>
 
-      {/* Sticker preview */}
-      <div className="flex justify-center px-6 pb-12">
-        <div className="bg-white shadow-lg rounded-2xl p-8 no-print">
-          <StickerDesign
-            commerceName={commerce.name}
-            qrUrl={wifiPageUrl}
-            ssid={commerce.ssid}
-          />
-        </div>
-        {/* Print-only version without the card wrapper */}
-        <div className="hidden print:flex print:items-center print:justify-center print:w-full print:h-full">
-          <StickerDesign
-            commerceName={commerce.name}
-            qrUrl={wifiPageUrl}
-            ssid={commerce.ssid}
-          />
-        </div>
+      <div className="no-print flex justify-center px-6 pb-6">
+        <p className="text-xs text-gray-400">Aperçu du sticker (taille réelle en impression) :</p>
       </div>
-    </div>
+
+      {/* Sticker – visible en aperçu ET en impression */}
+      <div
+        id="sticker-print-wrap"
+        className="flex justify-center px-6 pb-12"
+      >
+        <StickerDesign
+          commerceName={commerce.name}
+          qrUrl={wifiPageUrl}
+          ssid={commerce.ssid}
+        />
+      </div>
+    </>
   );
 }
