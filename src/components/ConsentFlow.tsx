@@ -56,7 +56,19 @@ export default function ConsentFlow({ commerce, slug }: { commerce: Commerce; sl
   }, [stage, countdown]);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(commerce.password);
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(commerce.password);
+    } else {
+      const el = document.createElement('textarea');
+      el.value = commerce.password;
+      el.style.position = 'fixed';
+      el.style.opacity = '0';
+      document.body.appendChild(el);
+      el.focus();
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
   };
