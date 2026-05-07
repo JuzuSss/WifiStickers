@@ -1,6 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import dynamic from 'next/dynamic';
+
+const QRCode = dynamic(() => import('./QRCode'), { ssr: false });
 
 type Commerce = {
   id: number;
@@ -152,6 +155,8 @@ export default function ConsentFlow({ commerce, slug }: { commerce: Commerce; sl
   }
 
   // ── Identifiants WiFi ───────────────────────────────────────────────────────
+  const wifiQrValue = `WIFI:T:${commerce.wifi_type};S:${commerce.ssid};P:${commerce.password};;`;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-900 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6">
@@ -161,16 +166,41 @@ export default function ConsentFlow({ commerce, slug }: { commerce: Commerce; sl
           <p className="text-gray-500 text-sm">{commerce.name}</p>
         </div>
 
-        {/* Réseau + mot de passe */}
-        <div className="bg-gray-50 rounded-xl p-4 mb-4">
-          <div className="mb-4">
-            <p className="text-xs text-gray-500 uppercase font-semibold mb-1">Réseau WiFi</p>
-            <p className="font-bold text-gray-900 text-xl">{commerce.ssid}</p>
+        {/* QR WiFi auto-connexion — méthode principale */}
+        <div className="bg-blue-50 rounded-2xl p-4 mb-4 text-center">
+          <p className="text-xs font-semibold text-blue-700 uppercase mb-3">
+            Connexion automatique
+          </p>
+          <div className="flex justify-center mb-3">
+            <div className="bg-white p-2 rounded-xl shadow-sm">
+              <QRCode value={wifiQrValue} size={180} />
+            </div>
+          </div>
+          <p className="text-xs text-blue-600 font-medium">
+            📷 Pointez votre appareil photo sur ce QR code
+          </p>
+          <p className="text-xs text-blue-500 mt-0.5">
+            Un popup "Rejoindre le réseau" va apparaître
+          </p>
+        </div>
+
+        {/* Séparateur */}
+        <div className="flex items-center gap-3 mb-4">
+          <div className="flex-1 h-px bg-gray-200" />
+          <span className="text-xs text-gray-400 font-medium">ou manuellement</span>
+          <div className="flex-1 h-px bg-gray-200" />
+        </div>
+
+        {/* Réseau + mot de passe — fallback */}
+        <div className="bg-gray-50 rounded-xl p-4 mb-3">
+          <div className="mb-3">
+            <p className="text-xs text-gray-500 uppercase font-semibold mb-1">Réseau</p>
+            <p className="font-bold text-gray-900 text-lg">{commerce.ssid}</p>
           </div>
           <div>
             <p className="text-xs text-gray-500 uppercase font-semibold mb-1">Mot de passe</p>
             <div className="flex items-center gap-2">
-              <p className="font-mono font-bold text-gray-900 text-xl flex-1 break-all">
+              <p className="font-mono font-bold text-gray-900 text-lg flex-1 break-all">
                 {showPassword ? commerce.password : '•'.repeat(Math.min(commerce.password.length, 16))}
               </p>
               <button
@@ -183,32 +213,12 @@ export default function ConsentFlow({ commerce, slug }: { commerce: Commerce; sl
           </div>
         </div>
 
-        {/* Copier le mot de passe — action principale */}
         <button
           onClick={handleCopy}
-          className="w-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold py-3 px-6 rounded-xl transition-all mb-3"
+          className="w-full bg-gray-100 hover:bg-gray-200 active:scale-95 text-gray-700 font-semibold py-2.5 px-6 rounded-xl transition-all text-sm"
         >
-          {copied ? '✓ Copié dans le presse-papier !' : '📋 Copier le mot de passe'}
+          {copied ? '✓ Copié !' : '📋 Copier le mot de passe'}
         </button>
-
-        {/* Instructions */}
-        <div className="bg-blue-50 rounded-xl p-3 text-xs text-blue-700">
-          <p className="font-semibold mb-1">Comment se connecter :</p>
-          <ol className="list-decimal list-inside space-y-0.5">
-            <li>Copiez le mot de passe (bouton ci-dessus)</li>
-            <li>
-              Allez dans{' '}
-              <span className="font-semibold">
-                Paramètres {'>'} WiFi
-              </span>
-            </li>
-            <li>
-              Sélectionnez{' '}
-              <span className="font-semibold">{commerce.ssid}</span>
-            </li>
-            <li>Collez le mot de passe et connectez-vous</li>
-          </ol>
-        </div>
       </div>
     </div>
   );
